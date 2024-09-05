@@ -1,4 +1,4 @@
-# Cypher-Indexer
+# Cypher-Indexer [wip]
 
 Cypher-Indexer is a high-performance, scalable, and extensible Solana blockchain indexer. It provides real-time indexing of Solana blockchain data without relying on IDLs, making it suitable for indexing any Solana program, including those without published IDLs.
 
@@ -63,7 +63,7 @@ The `config.json` file contains all the necessary configuration for the Cypher-I
   "geyser_plugin_config": {
     "libpath": "/path/to/libsolana_geyser_plugin.so",
     "accounts_selector": {
-      "owners": ["TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"]
+      "owners": [""]
     }
   }
 }
@@ -123,7 +123,7 @@ You can access the GraphQL playground at `http://localhost:8080/graphql`. Here's
 
 ```graphql
 query {
-  getAccount(pubkey: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") {
+  getAccount(pubkey: "") {
     pubkey
     lamports
     owner
@@ -137,7 +137,7 @@ query {
 The REST API is available at `http://localhost:8080/api`. Here's an example request:
 
 ```
-GET /api/account?pubkey=TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+GET /api/account?pubkey=
 ```
 
 ## Monitoring
@@ -154,7 +154,7 @@ Cypher-Indexer is released under the [MIT License](LICENSE).
 
 ## Support
 
-If you encounter any issues or have questions, please file an issue on the GitHub repository or reach out to our support team at support@cypher-indexer.com.
+If you encounter any issues or have questions, please file an issue on the GitHub repository.
 
 ## Acknowledgements
 
