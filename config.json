@@ -1,0 +1,14 @@
+{
+    "solana_rpc_url": "https://api.mainnet-beta.solana.com",
+    "clickhouse_url": "http://localhost:8123",
+    "scylla_nodes": ["127.0.0.1:9042"],
+    "redis_url": "redis://127.0.0.1:6379",
+    "rpc_poll_interval": 1,
+    "websocket_url": "wss://api.mainnet-beta.solana.com",
+    "geyser_plugin_config": {
+      "libpath": "/path/to/libsolana_geyser_plugin.so",
+      "accounts_selector": {
+        "owners": ["TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"]
+      }
+    }
+  }

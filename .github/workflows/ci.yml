@@ -1,0 +1,43 @@
+name: Cypher-Indexer CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    - name: Build
+      run: cargo build --release
+    - name: Run tests
+      run: cargo test
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    services:
+      clickhouse:
+        image: clickhouse/clickhouse-server
+        ports:
+          - 8123:8123
+      scylla:
+        image: scylladb/scylla
+        ports:
+          - 9042:9042
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    - name: Run integration tests
+      run: cargo test --test integration_tests
