@@ -1,12 +1,12 @@
+use crate::config::Config;
+use crate::processing::Processor;
+use async_trait::async_trait;
+use futures::StreamExt;
 use solana_client::{
     rpc_client::RpcClient,
     rpc_config::{RpcTransactionLogsConfig, RpcTransactionLogsFilter},
     rpc_response::RpcLogsResponse,
 };
-use crate::config::Config;
-use crate::processing::Processor;
-use async_trait::async_trait;
-use futures::StreamExt;
 
 pub struct WebsocketListener {
     rpc_client: RpcClient,
@@ -28,14 +28,21 @@ impl super::IngestionSource for WebsocketListener {
             kind: RpcTransactionLogsFilter::All,
         };
 
-        let (mut logs_notifications, logs_unsubscribe) = self.rpc_client
-            .on_logs_event(logs_config)
-            .await?;
+        let (mut logs_notifications, logs_unsubscribe) =
+            self.rpc_client.on_logs_event(logs_config).await?;
 
         while let Some(logs) = logs_notifications.next().await {
             match logs {
-                RpcLogsResponse::Logs { signature, logs, .. } => {
-                    let transaction = self.rpc_client.get_transaction(&signature, solana_transaction_status::UiTransactionEncoding::Json).await?;
+                RpcLogsResponse::Logs {
+                    signature, logs, ..
+                } => {
+                    let transaction = self
+                        .rpc_client
+                        .get_transaction(
+                            &signature,
+                            solana_transaction_status::UiTransactionEncoding::Json,
+                        )
+                        .await?;
                     processor.process_transaction(transaction, logs).await?;
                 }
                 _ => {}
