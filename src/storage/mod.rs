@@ -41,6 +41,54 @@ pub trait StorageBackend: Send + Sync {
     ) -> Result<Vec<Transaction>, Box<dyn std::error::Error>>;
 }
 
+pub type Account = serde_json::Value;
+pub type Transaction = serde_json::Value;
+
+#[derive(Clone, Debug)]
+pub struct StorageError {
+    message: String,
+}
+
+impl std::fmt::Display for StorageError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl std::error::Error for StorageError {}
+
+impl From<Box<dyn std::error::Error>> for StorageError {
+    fn from(error: Box<dyn std::error::Error>) -> Self {
+        StorageError {
+            message: error.to_string(),
+        }
+    }
+}
+
+impl From<redis::RedisError> for StorageError {
+    fn from(error: redis::RedisError) -> Self {
+        StorageError {
+            message: error.to_string(),
+        }
+    }
+}
+
+impl From<clickhouse::ClickhouseError> for StorageError {
+    fn from(error: clickhouse::ClickhouseError) -> Self {
+        StorageError {
+            message: error.to_string(),
+        }
+    }
+}
+
+impl From<scylla::ScyllaError> for StorageError {
+    fn from(error: scylla::ScyllaError) -> Self {
+        StorageError {
+            message: error.to_string(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Storage {
     clickhouse: clickhouse::ClickhouseStorage,

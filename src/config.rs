@@ -12,9 +12,9 @@ pub struct Config {
     pub geyser_plugin_config: GeyserPluginConfig,
     pub rpc_poll_interval: u64,
     pub websocket_url: String,
-    pub(crate) wasm_modules: Option<_>,
-    pub(crate) wasm_memory_limit: Option<i32>,
-    pub(crate) wasm_execution_timeout: Option<i32>,
+    pub wasm_modules: Option<_>,
+    pub wasm_memory_limit: Option<i32>,
+    pub wasm_execution_timeout: Option<i32>,
 }
 
 #[derive(Debug, Deserialize)]
