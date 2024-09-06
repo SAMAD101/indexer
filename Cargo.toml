@@ -1,5 +1,5 @@
 [package]
-name = "cypher-indexer"
+name = "cypher_indexer"
 version = "0.1.0"
 edition = "2021"
 
@@ -40,10 +40,12 @@ mockall = "0.13.0"
 proptest = "1.1"
 
 [lib]
+name = "cypher_indexer"
+path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [[bin]]
-name = "cypher-indexer"
+name = "cypher_indexer"
 path = "src/main.rs"
 
 [[bench]]
