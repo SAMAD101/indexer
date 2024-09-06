@@ -5,7 +5,10 @@ impl EventParser {
         Self
     }
 
-    pub fn parse_logs(&self, logs: &[String]) -> Result<Vec<ParsedEvent>, Box<dyn std::error::Error>> {
+    pub fn parse_logs(
+        &self,
+        logs: &[String],
+    ) -> Result<Vec<ParsedEvent>, Box<dyn std::error::Error>> {
         let mut events = Vec::new();
         for log in logs {
             if log.starts_with("Program log: ") {

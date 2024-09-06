@@ -3,18 +3,19 @@ use solana_sdk::pubkey::Pubkey;
 use solana_transaction_status::{EncodedConfirmedTransaction, UiConfirmedBlock};
 
 pub mod account_parser;
-pub mod instruction_parser;
 pub mod event_parser;
+pub mod instruction_parser;
 pub mod state_manager;
 
 use account_parser::AccountParser;
-use instruction_parser::InstructionParser;
 use event_parser::EventParser;
+use instruction_parser::InstructionParser;
 use state_manager::StateManager;
 
 #[derive(Clone)]
 pub struct Processor {
     storage: Storage,
+    ipfs_storage: IpfsStorage,
     account_parser: AccountParser,
     instruction_parser: InstructionParser,
     event_parser: EventParser,
@@ -22,9 +23,10 @@ pub struct Processor {
 }
 
 impl Processor {
-    pub fn new(storage: Storage) -> Self {
+    pub fn new(storage: Storage, ipfs_storage: IpfsStorage) -> Self {
         Self {
             storage,
+            ipfs_storage,
             account_parser: AccountParser::new(),
             instruction_parser: InstructionParser::new(),
             event_parser: EventParser::new(),
@@ -39,10 +41,21 @@ impl Processor {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let signature = transaction.transaction.signatures[0].to_string();
 
-        for (index, instruction) in transaction.transaction.message.instructions.iter().enumerate() {
-            let program_id = transaction.transaction.message.account_keys[instruction.program_id_index as usize];
-            let parsed_instruction = self.instruction_parser.parse_instruction(&program_id, instruction)?;
-            self.storage.store_instruction(parsed_instruction, slot, &signature).await?;
+        for (index, instruction) in transaction
+            .transaction
+            .message
+            .instructions
+            .iter()
+            .enumerate()
+        {
+            let program_id =
+                transaction.transaction.message.account_keys[instruction.program_id_index as usize];
+            let parsed_instruction = self
+                .instruction_parser
+                .parse_instruction(&program_id, instruction)?;
+            self.storage
+                .store_instruction(parsed_instruction, slot, &signature)
+                .await?;
         }
 
         if let Some(log_messages) = transaction.meta.log_messages {
@@ -57,8 +70,13 @@ impl Processor {
                 if let Some(account_keys) = &transaction.transaction.message.account_keys {
                     let pubkey = &account_keys[index];
                     if let Some(account_data) = &transaction.meta.post_token_balances {
-                        let parsed_account = self.account_parser.parse_account(pubkey, account_data, &Pubkey::default())?;
-                        self.state_manager.update_account(*pubkey, parsed_account.clone());
+                        let parsed_account = self.account_parser.parse_account(
+                            pubkey,
+                            account_data,
+                            &Pubkey::default(),
+                        )?;
+                        self.state_manager
+                            .update_account(*pubkey, parsed_account.clone());
                         self.storage.store_account(parsed_account, slot).await?;
                     }
                 }
@@ -89,7 +107,8 @@ impl Processor {
         slot: u64,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let parsed_account = self.account_parser.parse_account(&pubkey, &data, &owner)?;
-        self.state_manager.update_account(pubkey, parsed_account.clone());
+        self.state_manager
+            .update_account(pubkey, parsed_account.clone());
         self.storage.store_account(parsed_account, slot).await?;
         Ok(())
     }

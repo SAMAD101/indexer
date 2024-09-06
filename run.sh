@@ -1,22 +1,28 @@
 #!/bin/bash
 
-source .env
+# Ensure we're in the project root
+cd "$(dirname "$0")"
 
+# Build WASM module
+./build-wasm.sh
+
+# Start IPFS daemon if not already running
 if ! pgrep -x "ipfs" > /dev/null
 then
     ipfs daemon &
     IPFS_PID=$!
+    echo "Started IPFS daemon"
+else
+    echo "IPFS daemon is already running"
 fi
 
-wasmer run $WASM_MODULE_PATH --env-file .env
+# Run the indexer
+echo "Starting Cypher-Indexer..."
+cargo run --release
 
-if [ "$BACKUP_ENABLED" = true ] && [ "$BACKUP_IPFS_PIN" = true ]
-then
-    BACKUP_HASH=$(ipfs add -r $BACKUP_PATH | tail -n 1 | cut -d ' ' -f 2)
-    echo "Backup pinned to IPFS with hash: $BACKUP_HASH"
-fi
-
+# Stop IPFS daemon if we started it
 if [ ! -z "$IPFS_PID" ]
 then
     kill $IPFS_PID
+    echo "Stopped IPFS daemon"
 fi
