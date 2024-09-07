@@ -15,6 +15,8 @@ pub struct Config {
     pub wasm_modules: Option<_>,
     pub wasm_memory_limit: Option<i32>,
     pub wasm_execution_timeout: Option<i32>,
+    pub bigtable_instance_name: String,
+    pub bigtable_app_profile_id: String,
 }
 
 #[derive(Debug, Deserialize)]
