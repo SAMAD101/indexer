@@ -5,7 +5,6 @@ use std::fs;
 pub struct Config {
     pub solana_rpc_url: String,
     pub clickhouse_url: String,
-    pub scylla_nodes: Vec<String>,
     pub redis_url: String,
     pub ipfs_api_url: String,
     pub wasm_module_path: String,

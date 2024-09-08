@@ -2,7 +2,6 @@ mod bigtable;
 mod clickhouse;
 pub mod ipfs;
 mod redis;
-mod scylla;
 
 use crate::config::Config;
 use crate::processing::{ParsedAccount, ParsedEvent, ParsedInstruction};
@@ -44,8 +43,6 @@ pub enum StorageError {
     Redis(#[from] redis::RedisError),
     #[error("ClickHouse error: {0}")]
     Clickhouse(#[from] clickhouse::error::Error),
-    #[error("ScyllaDB error: {0}")]
-    Scylla(#[from] scylla::transport::errors::QueryError),
     #[error("IPFS error: {0}")]
     Ipfs(#[from] ipfs_api_backend_hyper::Error),
     #[error("BigTable error: {0}")]
@@ -59,7 +56,6 @@ pub enum StorageError {
 #[derive(Clone)]
 pub struct Storage {
     clickhouse: clickhouse::ClickhouseStorage,
-    scylla: scylla::ScyllaStorage,
     redis: redis::RedisStorage,
     bigtable: BigtableStorage,
 }
@@ -68,7 +64,6 @@ impl Storage {
     pub async fn new(config: &Config) -> Result<Self, StorageError> {
         Ok(Self {
             clickhouse: clickhouse::ClickhouseStorage::new(&config.clickhouse_url).await?,
-            scylla: scylla::ScyllaStorage::new(&config.scylla_nodes).await?,
             redis: redis::RedisStorage::new(&config.redis_url).await?,
             bigtable: BigtableStorage::new(
                 &config.bigtable_instance_name,
@@ -84,7 +79,6 @@ impl Storage {
         slot: u64,
     ) -> Result<(), StorageError> {
         self.clickhouse.store_account(account.clone(), slot).await?;
-        self.scylla.store_account(account.clone(), slot).await?;
         self.bigtable.store_account(account, slot).await?;
         Ok(())
     }
@@ -96,9 +90,6 @@ impl Storage {
         tx_signature: &str,
     ) -> Result<(), StorageError> {
         self.clickhouse
-            .store_instruction(instruction.clone(), slot, tx_signature)
-            .await?;
-        self.scylla
             .store_instruction(instruction.clone(), slot, tx_signature)
             .await?;
         self.bigtable
@@ -114,9 +105,6 @@ impl Storage {
         tx_signature: &str,
     ) -> Result<(), StorageError> {
         self.clickhouse
-            .store_event(event.clone(), slot, tx_signature)
-            .await?;
-        self.scylla
             .store_event(event.clone(), slot, tx_signature)
             .await?;
         self.bigtable.store_event(event, slot, tx_signature).await?;
